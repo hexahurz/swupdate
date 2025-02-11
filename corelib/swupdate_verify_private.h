@@ -20,6 +20,7 @@ EVP_PKEY *load_pubkey(const char *file);
 int check_code_sign(const X509_PURPOSE *xp, const X509 *crt, int ca);
 #endif
 X509_STORE *load_cert_chain(const char *file);
+int add_crl_to_store(X509_STORE *castore, const char *crl_file);
 #endif
 
 #endif

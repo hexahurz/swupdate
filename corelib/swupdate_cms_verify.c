@@ -122,6 +122,37 @@ X509_STORE *load_cert_chain(const char *file)
 	return castore;
 }
 
+int add_crl_to_store(X509_STORE *castore, const char *crl_file)
+{
+	BIO *fp = BIO_new_file(crl_file, "r");
+	if (!fp) {
+		TRACE("Unable to open CRL file %s", crl_file);
+		return 0;
+	}
+
+	X509_CRL *crl = NULL;
+	while ((crl = PEM_read_bio_X509_CRL(fp, NULL, NULL, NULL)) != NULL) {
+		if (X509_STORE_add_crl(castore, crl) != 1)
+		{
+			TRACE("Error adding CRL to store");
+			X509_CRL_free(crl);
+			BIO_free(fp);
+			return 0;
+		}
+
+		X509_CRL_free(crl);
+	}
+	BIO_free(fp);
+
+	// Set the flags for CRL checking
+	if(!X509_STORE_set_flags(castore, X509_V_FLAG_CRL_CHECK)) {
+		TRACE("Error setting CRL flags");
+		return 0;
+	}
+
+	return 1;
+}
+
 static inline int next_common_name(X509_NAME *subject, int i)
 {
 	return X509_NAME_get_index_by_NID(subject, NID_commonName, i);

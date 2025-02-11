@@ -101,6 +101,9 @@ static struct option long_options[] = {
 #if defined(CONFIG_SIGALG_CMS) && !defined(CONFIG_SSL_IMPL_WOLFSSL)
 	{"forced-signer-name", required_argument, NULL, '2'},
 #endif
+#if defined(CONFIG_SIGALG_CMS) && defined(CONFIG_SSL_IMPL_OPENSSL)
+	{"crl-path", required_argument, NULL, '4'},
+#endif
 #endif
 #ifdef CONFIG_ENCRYPTED_IMAGES
 	{"key-aes", required_argument, NULL, 'K'},
@@ -163,6 +166,9 @@ static void usage(char *programname)
 		"     --forced-signer-name <cn>  : set expected common name of signer certificate\n"
 #endif
 		"     --ca-path                  : path to the Certificate Authority (PEM)\n"
+#if defined(CONFIG_SIGALG_CMS) && defined(CONFIG_SSL_IMPL_OPENSSL)
+		"     --crl-path                 : path to the Certificate Revocation List (CRL)\n"
+#endif
 #endif
 #endif
 #ifdef CONFIG_ENCRYPTED_IMAGES
@@ -313,6 +319,8 @@ static int read_globals_settings(void *elem, void *data)
 				"public-key-file", sw->publickeyfname);
 	GET_FIELD_STRING(LIBCFG_PARSER, elem,
 				"ca-path", sw->publickeyfname);
+	GET_FIELD_STRING(LIBCFG_PARSER, elem,
+				"crl-path", sw->crlfname);
 	GET_FIELD_STRING(LIBCFG_PARSER, elem,
 				"aes-key-file", sw->aeskeyfname);
 	GET_FIELD_STRING(LIBCFG_PARSER, elem,
@@ -679,6 +687,9 @@ int main(int argc, char **argv)
 			swcfg.check_max_version = true;
 			strlcpy(swcfg.maximum_version, optarg,
 				sizeof(swcfg.maximum_version));
+			break;
+		case '4':
+			strlcpy(swcfg.crlfname, optarg, sizeof(swcfg.crlfname));
 			break;
 #ifdef CONFIG_ENCRYPTED_IMAGES
 		case 'K':

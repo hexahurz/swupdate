@@ -153,6 +153,15 @@ int swupdate_dgst_init(struct swupdate_cfg *sw, const char *keyfile)
 		goto dgst_init_error;
 	}
 
+	if (strlen(sw->crlfname)) {
+		TRACE("Loading CRL from %s", sw->crlfname);
+		if (!add_crl_to_store(dgst->certs, sw->crlfname)) {
+			ERROR("Error loading CRL from %s", sw->crlfname);
+			ret = -EINVAL;
+			goto dgst_init_error;
+		}
+	}
+
 #ifndef CONFIG_CMS_IGNORE_CERTIFICATE_PURPOSE
 	{
 		static char code_sign_name[] = "Code signing";
